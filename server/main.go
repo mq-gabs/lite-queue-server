@@ -2,6 +2,7 @@ package main
 
 import (
 	handler "lite_queue_server/handler"
+	"lite_queue_server/manager"
 	"log"
 	"net"
 )
@@ -13,6 +14,8 @@ func main() {
 		log.Fatalf("cannot listen: %v", err)
 	}
 
+	qm := manager.New()
+
 	for {
 		conn, err := l.Accept()
 
@@ -21,7 +24,7 @@ func main() {
 			continue
 		}
 
-		h := handler.New(conn)
+		h := handler.New(conn, qm)
 
 		go h.Handle()
 	}
