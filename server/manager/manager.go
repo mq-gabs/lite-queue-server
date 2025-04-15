@@ -1,21 +1,23 @@
-package main
+package manager
 
 import (
 	"errors"
 	"fmt"
+	queue "lite_queue_server/queue"
+	job "lite_queue_server/queue/job"
 )
 
 type QueueManager struct {
-	queues map[string]*Queue
+	queues map[string]*queue.Queue
 }
 
-func NewQueueManager() *QueueManager {
+func New() *QueueManager {
 	return &QueueManager{
-		queues: make(map[string]*Queue),
+		queues: make(map[string]*queue.Queue),
 	}
 }
 
-func (qm *QueueManager) getQueue(name string) (*Queue, error) {
+func (qm *QueueManager) getQueue(name string) (*queue.Queue, error) {
 	q, ok := qm.queues[name]
 
 	if !ok {
@@ -25,6 +27,16 @@ func (qm *QueueManager) getQueue(name string) (*Queue, error) {
 	return q, nil
 }
 
+func (qm *QueueManager) NewQueue(name string) error {
+	if _, err := qm.getQueue(name); err == nil {
+		return fmt.Errorf("queue %v already exists", name)
+	}
+
+	qm.queues[name] = queue.New()
+
+	return nil
+}
+
 func (qm *QueueManager) Push(name string, value []byte) error {
 	q, err := qm.getQueue(name)
 
@@ -32,11 +44,9 @@ func (qm *QueueManager) Push(name string, value []byte) error {
 		return err
 	}
 
-	j := Job{
-		Data: value,
-	}
+	j := job.New(value)
 
-	q.Push(&j)
+	q.Push(j)
 
 	return nil
 }
