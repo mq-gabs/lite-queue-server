@@ -3,8 +3,10 @@ package manager
 import (
 	"errors"
 	"fmt"
+	"lite_queue_server/protocol"
 	queue "lite_queue_server/queue"
 	job "lite_queue_server/queue/job"
+	"lite_queue_server/utils"
 )
 
 type QueueManager struct {
@@ -64,5 +66,25 @@ func (qm *QueueManager) Pop(name string) ([]byte, error) {
 		return nil, errors.New("job is empty")
 	}
 
-	return j.Data, nil
+	return utils.FlattenBytes([][]byte{
+		[]byte(j.Id),
+		[]byte{protocol.Seperator},
+		j.Data,
+	}), nil
+}
+
+func (qm *QueueManager) Ack(name, id string) error {
+	q, err := qm.getQueue(name)
+
+	if err != nil {
+		return err
+	}
+
+	err = q.Ack(id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

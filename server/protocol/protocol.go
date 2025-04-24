@@ -6,6 +6,7 @@ const (
 	RequestNewQueue byte = 0x30
 	RequestPush     byte = 0x31
 	RequestPop      byte = 0x32
+	RequestAck      byte = 0x33
 
 	ResponseSuccessEmpty   byte = 0x60
 	ResponseSuccessContent byte = 0x61

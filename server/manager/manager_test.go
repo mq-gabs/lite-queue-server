@@ -1,10 +1,13 @@
 package manager
 
 import (
+	"bytes"
+	"lite_queue_server/protocol"
 	"testing"
 )
 
 var m *QueueManager = New()
+var id string
 
 func TestNewQueue(t *testing.T) {
 	if err := m.NewQueue("names"); err != nil {
@@ -29,11 +32,24 @@ func TestPush(t *testing.T) {
 func TestPop(t *testing.T) {
 	data, err := m.Pop("names")
 
+	splitted := bytes.Split(data, []byte{protocol.Seperator})
+
+	id = string(splitted[0])
+	name := splitted[1]
+
 	if err != nil {
 		t.Fatalf("cannot pop: %v", err)
 	}
 
-	if string(data) != "John Doe" {
+	if string(name) != "John Doe" {
 		t.Fatalf("returned value must be 'Johb Doe': %v", data)
+	}
+}
+
+func TestAck(t *testing.T) {
+	err := m.Ack("names", id)
+
+	if err != nil {
+		t.Fatalf("cannot ack: %v", err)
 	}
 }

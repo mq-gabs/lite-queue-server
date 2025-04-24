@@ -84,6 +84,8 @@ func (h *Handler) Handle() {
 		h.push()
 	case protocol.RequestPop:
 		h.pop()
+	case protocol.RequestAck:
+		h.ack()
 	default:
 		h.responseError(fmt.Errorf("action not mapped: %v", action[0]))
 	}
@@ -142,4 +144,29 @@ func (h *Handler) pop() {
 	}
 
 	h.responseSuccess(res)
+}
+
+func (h *Handler) ack() {
+	name, err := h.readNext()
+
+	if err != nil {
+		h.responseError(err)
+		return
+	}
+
+	id, err := h.readNext()
+
+	if err != nil {
+		h.responseError(err)
+		return
+	}
+
+	err = h.manager.Ack(string(name), string(id))
+
+	if err != nil {
+		h.responseError(err)
+		return
+	}
+
+	h.responseSuccess(nil)
 }
